@@ -1,0 +1,11 @@
+[Unit]
+Description=Blog
+
+[Service]
+WorkingDirectory=/usr/local/lib/blog
+ExecStart=/usr/local/bin/blog --config=/usr/local/etc/blog_config.toml
+KillSignal=SIGINT
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

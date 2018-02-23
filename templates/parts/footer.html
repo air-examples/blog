@@ -1,0 +1,30 @@
+<footer>
+	<div class="wrapper">
+		<ul>
+			<li>Email</li>
+			<li>
+				<a href="mailto:{{.Config.bio.email}}">
+					<i class="fa fa-envelope-square"></i> {{.Config.bio.email}}
+				</a>
+			</li>
+		</ul>
+
+		<ul>
+			<li>GitHub</li>
+			<li>
+				<a href="https://github.com/{{.Config.bio.github_username}}">
+					<i class="fa fa-github-square"></i> {{.Config.bio.github_username}}
+				</a>
+			</li>
+		</ul>
+
+		<ul>
+			<li>Subscribe</li>
+			<li>
+				<a href="/feed">
+					<i class="fa fa-rss-square"></i> via RSS
+				</a>
+			</li>
+		</ul>
+	</div>
+</footer>

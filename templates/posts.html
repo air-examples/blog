@@ -1,0 +1,7 @@
+<ul class="posts">
+	{{range .Posts}}
+	<li>
+		<time datetime='{{timefmt .Datetime "2006-01-02T15:04:05Z07:00"}}' format="Y-MM-DD"></time> &nbsp;&raquo; <a href="/posts/{{.ID}}">{{.Title}}</a>
+	</li>
+	{{end}}
+</ul>

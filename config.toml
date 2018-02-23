@@ -1,0 +1,22 @@
+app_name = "blog"
+debug_mode = true
+address = "localhost:2333"
+minifier_enabled = true
+coffer_enabled = true
+
+[site]
+title = "Blog"
+description = "Jon Snow's blog."
+url = "https://jon.snow.castle.black"
+
+[bio]
+name = "Jon Snow"
+one_sentence = "I know everything."
+github_username = "air-examples"
+email = "jon.snow@castle.black"
+gender = "Male"
+birthdate = "283 AC"
+hobbies = ["Ice", "Fire", "Dragon"]
+now = "Aunt's bed"
+open_source_names = ["Blog"]
+open_source_urls = ["https://github.com/air-examples/blog"]
