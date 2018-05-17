@@ -238,10 +238,11 @@ func bioHandler(req *air.Request, res *air.Response) error {
 
 func feedHandler(req *air.Request, res *air.Response) error {
 	once.Do(parsePosts)
+	res.Headers["Content-Type"] = "application/atom+xml; charset=utf-8"
 	res.Headers["Cache-Control"] = "max-age=3600"
 	res.Headers["ETag"] = feedETag
 	res.Headers["Last-Modified"] = feedLastModified
-	return res.Blob("application/atom+xml; charset=utf-8", feed)
+	return res.Blob(feed)
 }
 
 func errorHandler(err error, req *air.Request, res *air.Response) {
