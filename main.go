@@ -75,10 +75,10 @@ func main() {
 			for {
 				select {
 				case event := <-watcher.Events:
-					air.INFO(event)
+					air.INFO(event.String())
 					once = sync.Once{}
 				case err := <-watcher.Errors:
-					air.ERROR(err)
+					air.ERROR(err.Error())
 				}
 			}
 		}()
@@ -89,7 +89,10 @@ func main() {
 	}()
 
 	air.Gases = []air.Gas{
+		loggerGas,
 		baseGas,
+		recoverGas,
+		bodyLimitGas,
 	}
 
 	air.TemplateFuncMap["sub"] = func(a, b int) int { return a - b }
@@ -120,7 +123,7 @@ func main() {
 
 	go func() {
 		if err := air.Serve(); err != nil {
-			air.ERROR(err)
+			air.ERROR(err.Error())
 		}
 	}()
 
@@ -192,11 +195,65 @@ func parsePosts() {
 	}
 }
 
+func loggerGas(next air.Handler) air.Handler {
+	return func(req *air.Request, res *air.Response) error {
+		startTime := time.Now()
+		err := next(req, res)
+		endTime := time.Now()
+
+		extras := map[string]interface{}{
+			"remote_addr": req.RemoteAddr,
+			"status_code": res.StatusCode,
+			"method":      req.Method,
+			"path":        req.URL.Path,
+			"start_time":  startTime.UnixNano(),
+			"end_time":    endTime.UnixNano(),
+			"latency":     endTime.Sub(startTime).String(),
+			"bytes_in":    req.ContentLength,
+			"bytes_out":   res.ContentLength,
+		}
+
+		if err != nil {
+			air.ERROR(err.Error(), extras)
+		} else {
+			air.INFO("finished rqueust-response cycle", extras)
+		}
+
+		return nil
+	}
+}
+
 func baseGas(next air.Handler) air.Handler {
 	return func(req *air.Request, res *air.Response) error {
-		req.Values["Config"] = air.Config
+		if strings.HasPrefix(req.URL.Host, "www.") {
+			res.StatusCode = 301
+			u := *req.URL
+			u.Host = u.Host[4:]
+			return res.Redirect(u.String())
+		}
 		if req.Method == "GET" || req.Method == "HEAD" {
 			res.Headers["Cache-Control"] = "no-cache"
+		}
+		req.Values["Config"] = air.Config
+		return next(req, res)
+	}
+}
+
+func recoverGas(next air.Handler) air.Handler {
+	return func(req *air.Request, res *air.Response) (reterr error) {
+		defer func() {
+			if r := recover(); r != nil {
+				reterr = fmt.Errorf("%v", r)
+			}
+		}()
+		return next(req, res)
+	}
+}
+
+func bodyLimitGas(next air.Handler) air.Handler {
+	return func(req *air.Request, res *air.Response) error {
+		if req.ContentLength > 1<<20 {
+			return &air.Error{413, "Request Entity Too Large"}
 		}
 		return next(req, res)
 	}
