@@ -28,8 +28,8 @@ window.onresize = function() {
 
 window.onscroll = function() {
 	var clientWidth = document.body.clientWidth;
-	if (clientWidth > 854) {
-		upper.style.right = clientWidth / 2 - 427 + "px";
+	if (clientWidth > 860) {
+		upper.style.right = clientWidth / 2 - 440 + "px";
 		if (window.pageYOffset > 800) {
 			upper.style.display = "block";
 		} else {

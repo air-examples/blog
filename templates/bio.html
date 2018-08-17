@@ -1,8 +1,8 @@
 <p><img src="/assets/images/night's watch.jpg"></p>
 
-<p><b>Name: </b>{{.Config.bio.name}}</p>
-<p><b>Gender: </b>{{.Config.bio.gender}}</p>
-<p><b>Birthdate: </b>{{.Config.bio.birthdate}}</p>
-<p><b>Hobbies: </b>{{range $i, $v := .Config.bio.hobbies}}{{$v}}{{if (lt $i (sub (len $.Config.bio.hobbies) 1))}}, {{end}}{{end}}</p>
-<p><b>Now: </b>{{.Config.bio.now}}</p>
-<p><b>Open Sources: </b>{{range $i, $v := .Config.bio.open_source_names}}<a href="{{index $.Config.bio.open_source_urls $i}}">{{$v}}</a>{{if (lt $i (sub (len $.Config.bio.open_source_names) 1))}}, {{end}}{{end}}</p>
+<p><b>{{locstr "Name"}}{{locstr ": "}}</b>{{locstr "Jon Snow"}}</p>
+<p><b>{{locstr "Gender"}}{{locstr ": "}}</b>{{locstr "Male"}}</p>
+<p><b>{{locstr "Birthdate"}}{{locstr ": "}}</b>{{locstr "283 AC"}}</p>
+<p><b>{{locstr "Hobbies"}}{{locstr ": "}}</b>{{locstr "Ice"}}{{locstr ", "}}{{locstr "Fire"}}{{locstr ", "}}{{locstr "Dragon"}}
+<p><b>{{locstr "Now"}}{{locstr ": "}}</b>{{locstr "Aunt's bed"}}</p>
+<p><b>{{locstr "Open Sources"}}{{locstr ": "}}</b><a href="https://github.com/air-examples/blog">Blog</a>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>{{xmlescape .Config.site.title}}</title>
-		<description>{{xmlescape .Config.site.description}}</description>
-		<link>{{.Config.site.url}}</link>
-		<atom:link href="{{print .Config.site.url "/feed"}}" rel="self" type="application/rss+xml"/>
+		<title>Blog</title>
+		<description>{{xmlescape "Jon Snow's blog."}}</description>
+		<link>https://jon.snow.castle.black</link>
+		<atom:link href="https://jon.snow.castle.black/feed" rel="self" type="application/rss+xml"/>
 		<pubDate>{{timefmt now "2006-01-02T15:04:05Z07:00"}}</pubDate>
 		<lastBuildDate>{{timefmt now "2006-01-02T15:04:05Z07:00"}}</lastBuildDate>
 		{{range .Posts}}
@@ -12,8 +12,8 @@
 			<title>{{xmlescape .Title}}</title>
 			<description>{{xmlescape (print .Content)}}</description>
 			<pubDate>{{timefmt .Datetime "2006-01-02T15:04:05Z07:00"}}</pubDate>
-			<link>{{print $.Config.site.url "/posts/" .ID}}</link>
-			<guid isPermaLink="true">{{print $.Config.site.url "/posts/" .ID}}</guid>
+			<link>https://jon.snow.castle.black{{print "/posts/" .ID}}</link>
+			<guid isPermaLink="true">https://jon.snow.castle.black{{print "/posts/" .ID}}</guid>
 		</item>
 		{{end}}
 	</channel>

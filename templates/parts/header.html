@@ -1,16 +1,16 @@
 <header>
 	<div class="wrapper">
-		<a class="title" href="/">{{.Config.site.title}}</a>
+		<a class="title" href="/">{{locstr "Blog"}}</a>
 
 		<nav>
 			<a class="toggler" href="javascript:;">
-				<i class="fa fa-navicon"></i>
+				<img class="icon" src="/assets/images/icons/bars.svg">
 			</a>
 
 			<div class="trigger">
-				<a href="/">Index</a>
-				<a {{if .IsPosts}}class="selected"{{end}} href="/posts">Posts</a>
-				<a {{if .IsBio}}class="selected"{{end}} href="/bio">Bio</a>
+				<a href="/">{{locstr "Index"}}</a>
+				<a {{if .IsPosts}}class="selected"{{end}} href="/posts">{{locstr "Posts"}}</a>
+				<a {{if .IsBio}}class="selected"{{end}} href="/bio">{{locstr "Bio"}}</a>
 			</div>
 		</nav>
 	</div>

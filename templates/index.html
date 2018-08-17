@@ -3,15 +3,15 @@
 	{{template "parts/head.html" .}}
 
 	<body>
-		<div class="index-info-card">
+		<div class="facade">
 			<img src="/assets/images/avatar.jpg">
-			<h1>{{.Config.bio.name}}</h1>
-			<h2>{{.Config.bio.one_sentence}}</h2>
+			<h1>{{locstr "Jon Snow"}}</h1>
+			<h2>{{locstr "I know everything."}}</h2>
 			<hr>
 			<ul>
-				<li><a href="https://github.com/{{.Config.bio.github_username}}">GitHub</a></li>
-				<li><a href="/posts">Posts</a></li>
-				<li><a href="/bio">Bio</a></li>
+				<li><a href="https://github.com/air-examples">GitHub</a></li>
+				<li><a href="/posts">{{locstr "Posts"}}</a></li>
+				<li><a href="/bio">{{locstr "Bio"}}</a></li>
 			</ul>
 		</div>
 	</body>

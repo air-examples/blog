@@ -1,4 +1,4 @@
 <div class="error">
-	<i class="fa fa-frown-o"></i>
-	<p>Error {{.Error.Code}}: {{.Error.Message}}</p>
+	<img class="icon" src="/assets/images/icons/frown.svg">
+	<p>{{locstr "Error"}} {{.Error.Code}}{{locstr ": "}}{{locstr .Error.Message}}{{locstr "!"}}</p>
 </div>

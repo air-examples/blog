@@ -1,5 +1,9 @@
 @charset "utf-8";
 
+* {
+	box-sizing: border-box;
+}
+
 body,
 h1,
 h2,
@@ -35,7 +39,7 @@ ol,
 dl,
 table,
 hr {
-	margin-bottom: 12.5px;
+	margin-bottom: 10px;
 }
 
 hr {
@@ -57,7 +61,7 @@ img {
 
 ul,
 ol {
-	margin-left: 25px;
+	margin-left: 20px;
 }
 
 li > ul,
@@ -69,7 +73,7 @@ table {
 	border-collapse: collapse;
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 600px) {
 	table {
 		width: 100%;
 	}
@@ -95,9 +99,9 @@ a:hover {
 }
 
 blockquote {
-	border-left: 4px solid #e8e8e8;
+	border-left: 5px solid #e8e8e8;
 	color: #828282;
-	padding-left: 12.5px;
+	padding-left: 10px;
 }
 
 blockquote > :last-child {
@@ -123,55 +127,55 @@ code {
 pre > code {
 	border: 0;
 	display: block;
-	padding: 10px;
+	padding: 9px;
 }
 
-.index-info-card {
+.facade {
 	border: 1px solid #e8e8e8;
-	margin: 25px auto;
+	margin: 20px auto;
 	padding: 10px 0;
 	text-align: center;
 	width: 500px;
 }
 
 @media screen and (max-width: 600px) {
-	.index-info-card {
+	.facade {
 		margin: 10px auto;
-		width: calc(100% - 25px);
+		width: calc(100% - 20px);
 	}
 }
 
-.index-info-card img {
+.facade img {
 	border-radius: 50%;
 	width: 50%;
 }
 
-.index-info-card h1 {
+.facade h1 {
 	font-weight: normal;
 	margin: 10px 0 0;
 }
 
-.index-info-card h2 {
+.facade h2 {
 	color: #828282;
 	font-size: 16px;
 	font-weight: normal;
 	margin: 0;
 }
 
-.index-info-card hr {
+.facade hr {
 	margin: 10px 0;
 }
 
-.index-info-card ul {
+.facade ul {
 	list-style: none;
 	margin: 0;
 }
 
-.index-info-card li {
+.facade li {
 	display: inline-block;
 }
 
-.index-info-card li:not(:last-child) {
+.facade li:not(:last-child) {
 	border-right: 1px solid #e8e8e8;
 	margin-right: 10px;
 	padding-right: 10px;
@@ -179,7 +183,7 @@ pre > code {
 
 .wrapper {
 	margin: 0 auto;
-	max-width: 780px;
+	max-width: 800px;
 	padding: 0 10px;
 }
 
@@ -189,13 +193,13 @@ pre > code {
 	display: table;
 }
 
-.fa {
+.icon {
 	color: #000;
 }
 
 header {
 	border-bottom: 1px solid #e8e8e8;
-	min-height: 56px;
+	height: 60px;
 	position: relative;
 }
 
@@ -203,7 +207,7 @@ header .title {
 	float: left;
 	font-size: 26px;
 	letter-spacing: -1px;
-	line-height: 56px;
+	line-height: 60px;
 	margin-bottom: 0;
 }
 
@@ -218,7 +222,7 @@ header .title:hover {
 
 nav {
 	float: right;
-	line-height: 56px;
+	line-height: 60px;
 }
 
 .toggler {
@@ -229,11 +233,11 @@ nav {
 	border: 1px solid #e8e8e8;
 	color: #000;
 	line-height: 1.5;
-	padding: 3px 5px;
+	padding: 5px;
 }
 
 .trigger a:not(:first-child) {
-	margin-left: 25px;
+	margin-left: 20px;
 }
 
 .trigger a:hover {
@@ -252,21 +256,21 @@ nav {
 		position: absolute;
 		right: 10px;
 		text-align: right;
-		top: 9px;
+		top: 10px;
 	}
 
 	.toggler {
 		display: block;
 		float: right;
-		height: 36px;
+		height: 38px;
 		line-height: 0;
 		text-align: center;
-		width: 36px;
+		width: 38px;
 	}
 
-	.toggler .fa {
-		font-size: 20px;
-		line-height: 36px;
+	.toggler .icon {
+		height: 20px;
+		margin: 9px 0;
 	}
 
 	.trigger {
@@ -291,7 +295,7 @@ nav {
 
 main {
 	display: block;
-	padding: 25px 0;
+	padding: 20px 0;
 }
 
 .posts {
@@ -300,7 +304,7 @@ main {
 }
 
 .posts > li:not(:last-child) {
-	margin-bottom: 25px;
+	margin-bottom: 20px;
 }
 
 time {
@@ -315,7 +319,7 @@ article h1 {
 
 article time {
 	display: block;
-	margin-bottom: 25px;
+	margin-bottom: 20px;
 }
 
 article h2 {
@@ -334,7 +338,7 @@ article p {
 	text-align: justify;
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 600px) {
 	article p {
 		text-align: left;
 	}
@@ -345,8 +349,8 @@ article p {
 	text-align: center;
 }
 
-.error .fa {
-	font-size: 100px;
+.error .icon {
+	height: 100px;
 }
 
 .error p {
@@ -358,27 +362,27 @@ article p {
 	border: 1px solid #e8e8e8;
 	bottom: 10px;
 	display: none;
-	height: 36px;
+	height: 40px;
 	position: fixed;
 	right: 10px;
 	text-align: center;
-	width: 36px;
+	width: 40px;
 }
 
 .upper:hover {
 	text-decoration: none;
 }
 
-.upper .fa {
-	font-size: 20px;
-	line-height: 36px;
+.upper .icon {
+	height: 20px;
+	margin: 9px 0;
 }
 
 footer {
 	border-top: 1px solid #e8e8e8;
 	color: #828282;
 	font-size: 15px;
-	padding: 25px 0;
+	padding: 20px 0;
 }
 
 footer ul {
@@ -388,9 +392,9 @@ footer ul {
 	width: 33.333333%;
 }
 
-footer .fa {
-	font-size: 17px;
-	margin-right: 4px;
+footer .icon {
+	height: 17px;
+	margin-bottom: 2.5px;
 }
 
 @media screen and (max-width: 600px) {
@@ -400,7 +404,7 @@ footer .fa {
 	}
 
 	footer ul:not(:last-child) {
-		margin-bottom: 12.5px;
+		margin-bottom: 10px;
 	}
 }
 

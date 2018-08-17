@@ -3,7 +3,10 @@ Description=Blog
 
 [Service]
 WorkingDirectory=/usr/local/lib/blog
-ExecStart=/usr/local/bin/blog --config=/usr/local/etc/blog_config.toml
+ExecStart=/usr/local/bin/blog --config=/usr/local/etc/blog-config.toml
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=blog
 KillSignal=SIGINT
 Restart=always
 
