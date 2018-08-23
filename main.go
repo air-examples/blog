@@ -51,7 +51,7 @@ func init() {
 	postsWatcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		air.FATAL(
-			"failed to build post's watcher",
+			"failed to build post watcher",
 			map[string]interface{}{
 				"error": err.Error(),
 			},
