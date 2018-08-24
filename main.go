@@ -50,19 +50,9 @@ var (
 func init() {
 	postsWatcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		air.FATAL(
-			"failed to build post watcher",
-			map[string]interface{}{
-				"error": err.Error(),
-			},
-		)
+		panic(fmt.Errorf("failed to build post watcher: %v", err))
 	} else if err := postsWatcher.Add("posts"); err != nil {
-		air.FATAL(
-			"failed to watch post files",
-			map[string]interface{}{
-				"error": err.Error(),
-			},
-		)
+		panic(fmt.Errorf("failed to watch post directory: %v", err))
 	}
 
 	go func() {
@@ -90,12 +80,7 @@ func init() {
 
 	b, err := ioutil.ReadFile(filepath.Join(air.TemplateRoot, "feed.xml"))
 	if err != nil {
-		air.FATAL(
-			"failed to read feed file",
-			map[string]interface{}{
-				"error": err.Error(),
-			},
-		)
+		panic(fmt.Errorf("failed to read feed template file: %v", err))
 	}
 
 	feedTemplate = template.Must(
