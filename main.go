@@ -115,10 +115,12 @@ func main() {
 	air.STATIC(
 		"/assets",
 		air.AssetRoot,
-		air.WrapGas(func(req *air.Request, res *air.Response) error {
-			res.Headers["Cache-Control"] = "max-age=3600"
-			return nil
-		}),
+		func(next air.Handler) air.Handler {
+			return func(req *air.Request, res *air.Response) error {
+				res.Headers["Cache-Control"] = "max-age=3600"
+				return next(req, res)
+			}
+		},
 	)
 	air.GET("/", homeHandler)
 	air.HEAD("/", homeHandler)
