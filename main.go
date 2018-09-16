@@ -101,7 +101,8 @@ func init() {
 }
 
 func main() {
-	air.Gases = []air.Gas{
+	air.ErrorHandler = errorHandler
+	air.Pregases = []air.Gas{
 		logger.Gas(logger.GasConfig{}),
 		defibrillator.Gas(defibrillator.GasConfig{}),
 		redirector.WWW2NonWWWGas(redirector.WWW2NonWWWGasConfig{}),
@@ -109,7 +110,6 @@ func main() {
 			MaxBytes: 1 << 20,
 		}),
 	}
-	air.ErrorHandler = errorHandler
 
 	air.FILE("/robots.txt", "robots.txt")
 	air.STATIC(
