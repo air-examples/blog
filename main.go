@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	htemplate "html/template"
 	"io/ioutil"
@@ -108,8 +109,12 @@ func main() {
 		redirector.WWW2NonWWWGas(redirector.WWW2NonWWWGasConfig{}),
 		limiter.BodySizeGas(limiter.BodySizeGasConfig{
 			MaxBytes: 1 << 20,
+			Error413: errors.New("Request Entity Too Large"),
 		}),
 	}
+
+	air.NotFoundHandler = notFoundHandler
+	air.MethodNotAllowedHandler = methodNotAllowedHandler
 
 	air.FILE("/robots.txt", "robots.txt")
 	air.STATIC(
@@ -117,7 +122,11 @@ func main() {
 		air.AssetRoot,
 		func(next air.Handler) air.Handler {
 			return func(req *air.Request, res *air.Response) error {
-				res.Headers["Cache-Control"] = "max-age=3600"
+				res.Headers["cache-control"] = &air.Header{
+					Name:   "cache-control",
+					Values: []string{"max-age=3600"},
+				}
+
 				return next(req, res)
 			}
 		},
@@ -221,7 +230,8 @@ func postsHandler(req *air.Request, res *air.Response) error {
 
 func postHandler(req *air.Request, res *air.Response) error {
 	postsOnce.Do(parsePosts)
-	p, ok := posts[req.Params["ID"]]
+
+	p, ok := posts[req.Params["ID"].FirstValue().String()]
 	if !ok {
 		return air.NotFoundHandler(req, res)
 	}
@@ -243,34 +253,61 @@ func bioHandler(req *air.Request, res *air.Response) error {
 
 func feedHandler(req *air.Request, res *air.Response) error {
 	postsOnce.Do(parsePosts)
-	res.Headers["Content-Type"] = "application/atom+xml; charset=utf-8"
-	res.Headers["Cache-Control"] = "max-age=3600"
-	res.Headers["ETag"] = feedETag
-	res.Headers["Last-Modified"] = feedLastModified
-	return res.Blob(feed)
+
+	res.Headers["content-type"] = &air.Header{
+		Name:   "content-type",
+		Values: []string{"application/atom+xml; charset=utf-8"},
+	}
+
+	res.Headers["cache-control"] = &air.Header{
+		Name:   "cache-control",
+		Values: []string{"max-age=3600"},
+	}
+
+	res.Headers["etag"] = &air.Header{
+		Name:   "etag",
+		Values: []string{feedETag},
+	}
+
+	res.Headers["last-modified"] = &air.Header{
+		Name:   "last-modified",
+		Values: []string{feedLastModified},
+	}
+
+	return res.WriteBlob(feed)
 }
 
 func errorHandler(err error, req *air.Request, res *air.Response) {
-	e := &air.Error{
-		Code:    500,
-		Message: "Internal Server Error",
-	}
-	if ce, ok := err.(*air.Error); ok {
-		e = ce
-	} else if air.DebugMode {
-		e.Message = err.Error()
+	if res.Written {
+		return
 	}
 
-	if !res.Written {
-		res.StatusCode = e.Code
-		if req.Method == "GET" || req.Method == "HEAD" {
-			delete(res.Headers, "Cache-Control")
-			delete(res.Headers, "ETag")
-			delete(res.Headers, "Last-Modified")
-		}
-
-		req.Values["PageTitle"] = e.Code
-		req.Values["Error"] = e
-		res.Render(req.Values, "error.html", "layouts/default.html")
+	if res.Status < 400 {
+		res.Status = 500
 	}
+
+	m := err.Error()
+	if res.Status == 500 && !air.DebugMode {
+		m = "Internal Server Error"
+	}
+
+	if req.Method == "GET" || req.Method == "HEAD" {
+		delete(res.Headers, "cache-control")
+		delete(res.Headers, "etag")
+		delete(res.Headers, "last-modified")
+	}
+
+	req.Values["PageTitle"] = res.Status
+	req.Values["Error"] = m
+	res.Render(req.Values, "error.html", "layouts/default.html")
+}
+
+var notFoundHandler = func(req *air.Request, res *air.Response) error {
+	res.Status = 404
+	return errors.New("Not Found")
+}
+
+var methodNotAllowedHandler = func(req *air.Request, res *air.Response) error {
+	res.Status = 405
+	return errors.New("Method Not Allowed")
 }
