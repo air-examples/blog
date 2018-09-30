@@ -25,9 +25,9 @@ import (
 	"github.com/air-gases/redirector"
 	"github.com/aofei/air"
 	"github.com/fsnotify/fsnotify"
+	"github.com/russross/blackfriday/v2"
 	"github.com/tdewolff/minify"
 	mxml "github.com/tdewolff/minify/xml"
-	"gopkg.in/russross/blackfriday.v2"
 )
 
 type post struct {
