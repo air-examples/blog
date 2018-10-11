@@ -5,11 +5,7 @@ var times = document.getElementsByTagName("time");
 var pres = document.getElementsByTagName("pre");
 
 toggler.onclick = function() {
-	if (trigger.style.display !== "block") {
-		trigger.style.display = "block";
-	} else {
-		trigger.style.display = "none";
-	}
+	trigger.style.display = trigger.style.display !== "block" ? "block" : "none";
 };
 
 upper.onclick = function() {
@@ -23,6 +19,7 @@ window.onresize = function() {
 	} else if (clientWidth <= 600 && trigger.style.display !== "none") {
 		trigger.style.display = "none";
 	}
+
 	window.onscroll();
 };
 
@@ -30,11 +27,7 @@ window.onscroll = function() {
 	var clientWidth = document.body.clientWidth;
 	if (clientWidth > 860) {
 		upper.style.right = clientWidth / 2 - 440 + "px";
-		if (window.pageYOffset > 800) {
-			upper.style.display = "block";
-		} else {
-			upper.style.display = "none";
-		}
+		upper.style.display = window.pageYOffset > 800 ? "block" : "none";
 	}
 };
 
