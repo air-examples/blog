@@ -286,9 +286,9 @@ func errorHandler(err error, req *air.Request, res *air.Response) {
 		res.Status = 500
 	}
 
-	m := err.Error()
+	message := err.Error()
 	if res.Status == 500 && !air.DebugMode {
-		m = "Internal Server Error"
+		message = "Internal Server Error"
 	}
 
 	if req.Method == "GET" || req.Method == "HEAD" {
@@ -298,7 +298,10 @@ func errorHandler(err error, req *air.Request, res *air.Response) {
 	}
 
 	req.Values["PageTitle"] = res.Status
-	req.Values["Error"] = m
+	req.Values["Error"] = map[string]interface{}{
+		"Code":    res.Status,
+		"Message": message,
+	}
 	res.Render(req.Values, "error.html", "layouts/default.html")
 }
 
