@@ -231,7 +231,7 @@ func postsHandler(req *air.Request, res *air.Response) error {
 func postHandler(req *air.Request, res *air.Response) error {
 	postsOnce.Do(parsePosts)
 
-	p, ok := posts[req.Params["ID"].FirstValue().String()]
+	p, ok := posts[req.Params["ID"].Value().String()]
 	if !ok {
 		return air.NotFoundHandler(req, res)
 	}
