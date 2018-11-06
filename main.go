@@ -122,11 +122,7 @@ func main() {
 		air.AssetRoot,
 		func(next air.Handler) air.Handler {
 			return func(req *air.Request, res *air.Response) error {
-				res.Headers["cache-control"] = &air.Header{
-					Name:   "cache-control",
-					Values: []string{"max-age=3600"},
-				}
-
+				res.SetHeader("cache-control", "max-age=3600")
 				return next(req, res)
 			}
 		},
@@ -231,7 +227,7 @@ func postsHandler(req *air.Request, res *air.Response) error {
 func postHandler(req *air.Request, res *air.Response) error {
 	postsOnce.Do(parsePosts)
 
-	p, ok := posts[req.Params["ID"].Value().String()]
+	p, ok := posts[req.Param("ID").Value().String()]
 	if !ok {
 		return air.NotFoundHandler(req, res)
 	}
@@ -254,25 +250,10 @@ func bioHandler(req *air.Request, res *air.Response) error {
 func feedHandler(req *air.Request, res *air.Response) error {
 	postsOnce.Do(parsePosts)
 
-	res.Headers["content-type"] = &air.Header{
-		Name:   "content-type",
-		Values: []string{"application/atom+xml; charset=utf-8"},
-	}
-
-	res.Headers["cache-control"] = &air.Header{
-		Name:   "cache-control",
-		Values: []string{"max-age=3600"},
-	}
-
-	res.Headers["etag"] = &air.Header{
-		Name:   "etag",
-		Values: []string{feedETag},
-	}
-
-	res.Headers["last-modified"] = &air.Header{
-		Name:   "last-modified",
-		Values: []string{feedLastModified},
-	}
+	res.SetHeader("content-type", "application/atom+xml; charset=utf-8")
+	res.SetHeader("cache-control", "max-age=3600")
+	res.SetHeader("etag", feedETag)
+	res.SetHeader("last-modified", feedLastModified)
 
 	return res.WriteBlob(feed)
 }
@@ -292,9 +273,9 @@ func errorHandler(err error, req *air.Request, res *air.Response) {
 	}
 
 	if req.Method == "GET" || req.Method == "HEAD" {
-		delete(res.Headers, "cache-control")
-		delete(res.Headers, "etag")
-		delete(res.Headers, "last-modified")
+		res.SetHeader("cache-control")
+		res.SetHeader("etag")
+		res.SetHeader("last-modified")
 	}
 
 	req.Values["PageTitle"] = res.Status
@@ -302,6 +283,7 @@ func errorHandler(err error, req *air.Request, res *air.Response) {
 		"Code":    res.Status,
 		"Message": message,
 	}
+
 	res.Render(req.Values, "error.html", "layouts/default.html")
 }
 

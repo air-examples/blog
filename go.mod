@@ -2,11 +2,11 @@ module github.com/air-examples/blog
 
 require (
 	github.com/BurntSushi/toml v0.3.1
-	github.com/air-gases/defibrillator v0.0.0-20181106035641-195023930ba0
-	github.com/air-gases/limiter v0.0.0-20181106035748-0f58a059d3ca
-	github.com/air-gases/logger v0.0.0-20181106035527-15121072e1c9
-	github.com/air-gases/redirector v0.0.0-20181106035722-262a38cfbab5
-	github.com/aofei/air v0.0.0-20181106035338-0ac858abaef8
+	github.com/air-gases/defibrillator v0.0.0-20181106103120-3595f7858d87
+	github.com/air-gases/limiter v0.0.0-20181106103602-b397777c2022
+	github.com/air-gases/logger v0.0.0-20181106103036-f5820cc359fd
+	github.com/air-gases/redirector v0.0.0-20181106103526-54a7d1048bcc
+	github.com/aofei/air v0.0.0-20181106102140-aa0c2b0aa1be
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/russross/blackfriday/v2 v2.0.1
 	github.com/shurcooL/sanitized_anchor_name v0.0.0-20170918181015-86672fcb3f95 // indirect
