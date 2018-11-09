@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/xml"
 	"errors"
+	"flag"
 	"fmt"
 	htemplate "html/template"
 	"io/ioutil"
@@ -49,6 +50,11 @@ var (
 )
 
 func init() {
+	cf := flag.String("config", "config.toml", "configuration file")
+	flag.Parse()
+
+	air.ConfigFile = *cf
+
 	postsWatcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		panic(fmt.Errorf("failed to build post watcher: %v", err))
