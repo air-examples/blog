@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/xml"
-	"errors"
 	"flag"
 	"fmt"
 	htemplate "html/template"
@@ -49,11 +48,13 @@ var (
 	feedLastModified string
 )
 
+var a = air.Default
+
 func init() {
 	cf := flag.String("config", "config.toml", "configuration file")
 	flag.Parse()
 
-	air.ConfigFile = *cf
+	a.ConfigFile = *cf
 
 	postsWatcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -66,7 +67,7 @@ func init() {
 		for {
 			select {
 			case e := <-postsWatcher.Events:
-				air.DEBUG(
+				a.DEBUG(
 					"post file event occurs",
 					map[string]interface{}{
 						"file":  e.Name,
@@ -75,7 +76,7 @@ func init() {
 				)
 				postsOnce = sync.Once{}
 			case err := <-postsWatcher.Errors:
-				air.ERROR(
+				a.ERROR(
 					"post watcher error",
 					map[string]interface{}{
 						"error": err.Error(),
@@ -85,7 +86,7 @@ func init() {
 		}
 	}()
 
-	b, err := ioutil.ReadFile(filepath.Join(air.TemplateRoot, "feed.xml"))
+	b, err := ioutil.ReadFile(filepath.Join(a.TemplateRoot, "feed.xml"))
 	if err != nil {
 		panic(fmt.Errorf("failed to read feed template file: %v", err))
 	}
@@ -101,65 +102,58 @@ func init() {
 				"now": func() time.Time {
 					return time.Now().UTC()
 				},
-				"timefmt": air.TemplateFuncMap["timefmt"],
+				"timefmt": a.TemplateFuncMap["timefmt"],
 			}).
 			Parse(string(b)),
 	)
 }
 
 func main() {
-	air.ErrorHandler = errorHandler
-	air.Pregases = []air.Gas{
+	a.ErrorHandler = errorHandler
+	a.Pregases = []air.Gas{
 		logger.Gas(logger.GasConfig{}),
 		defibrillator.Gas(defibrillator.GasConfig{}),
 		redirector.WWW2NonWWWGas(redirector.WWW2NonWWWGasConfig{}),
 		limiter.BodySizeGas(limiter.BodySizeGasConfig{
 			MaxBytes: 1 << 20,
-			Error413: errors.New("Request Entity Too Large"),
 		}),
 	}
 
-	air.NotFoundHandler = notFoundHandler
-	air.MethodNotAllowedHandler = methodNotAllowedHandler
-
-	air.FILE("/robots.txt", "robots.txt")
-	air.STATIC(
+	a.FILE("/robots.txt", "robots.txt")
+	a.STATIC(
 		"/assets",
-		air.AssetRoot,
+		a.AssetRoot,
 		func(next air.Handler) air.Handler {
 			return func(req *air.Request, res *air.Response) error {
-				res.SetHeader("cache-control", "max-age=3600")
+				res.Header.Set("Cache-Control", "max-age=3600")
 				return next(req, res)
 			}
 		},
 	)
-	air.GET("/", homeHandler)
-	air.HEAD("/", homeHandler)
-	air.GET("/posts", postsHandler)
-	air.HEAD("/posts", postsHandler)
-	air.GET("/posts/:ID", postHandler)
-	air.HEAD("/posts/:ID", postHandler)
-	air.GET("/bio", bioHandler)
-	air.HEAD("/bio", bioHandler)
-	air.GET("/feed", feedHandler)
-	air.HEAD("/feed", feedHandler)
+	a.GET("/", homeHandler)
+	a.HEAD("/", homeHandler)
+	a.GET("/posts", postsHandler)
+	a.HEAD("/posts", postsHandler)
+	a.GET("/posts/:ID", postHandler)
+	a.HEAD("/posts/:ID", postHandler)
+	a.GET("/bio", bioHandler)
+	a.HEAD("/bio", bioHandler)
+	a.GET("/feed", feedHandler)
+	a.HEAD("/feed", feedHandler)
 
 	shutdownChan := make(chan os.Signal, 1)
 	signal.Notify(shutdownChan, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
-		if err := air.Serve(); err != nil {
-			air.ERROR(
-				"server error",
-				map[string]interface{}{
-					"error": err.Error(),
-				},
-			)
+		if err := a.Serve(); err != nil {
+			a.ERROR("server error", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}()
 
 	<-shutdownChan
-	air.Shutdown(time.Minute)
+	a.Shutdown(time.Minute)
 }
 
 func parsePosts() {
@@ -235,7 +229,7 @@ func postHandler(req *air.Request, res *air.Response) error {
 
 	p, ok := posts[req.Param("ID").Value().String()]
 	if !ok {
-		return air.NotFoundHandler(req, res)
+		return a.NotFoundHandler(req, res)
 	}
 
 	req.Values["PageTitle"] = p.Title
@@ -256,10 +250,10 @@ func bioHandler(req *air.Request, res *air.Response) error {
 func feedHandler(req *air.Request, res *air.Response) error {
 	postsOnce.Do(parsePosts)
 
-	res.SetHeader("content-type", "application/atom+xml; charset=utf-8")
-	res.SetHeader("cache-control", "max-age=3600")
-	res.SetHeader("etag", feedETag)
-	res.SetHeader("last-modified", feedLastModified)
+	res.Header.Set("Content-Type", "application/atom+xml; charset=utf-8")
+	res.Header.Set("Cache-Control", "max-age=3600")
+	res.Header.Set("ETag", feedETag)
+	res.Header.Set("Last-Modified", feedLastModified)
 
 	return res.WriteBlob(feed)
 }
@@ -269,36 +263,26 @@ func errorHandler(err error, req *air.Request, res *air.Response) {
 		return
 	}
 
-	if res.Status < 400 {
-		res.Status = 500
+	if res.Status < http.StatusBadRequest {
+		res.Status = http.StatusInternalServerError
 	}
 
-	message := err.Error()
-	if res.Status == 500 && !air.DebugMode {
-		message = "Internal Server Error"
+	m := err.Error()
+	if !req.Air.DebugMode && res.Status == http.StatusInternalServerError {
+		m = http.StatusText(res.Status)
 	}
 
-	if req.Method == "GET" || req.Method == "HEAD" {
-		res.SetHeader("cache-control")
-		res.SetHeader("etag")
-		res.SetHeader("last-modified")
+	if req.Method == http.MethodGet || req.Method == http.MethodHead {
+		res.Header.Del("Cache-Control")
+		res.Header.Del("ETag")
+		res.Header.Del("Last-Modified")
 	}
 
 	req.Values["PageTitle"] = res.Status
 	req.Values["Error"] = map[string]interface{}{
 		"Code":    res.Status,
-		"Message": message,
+		"Message": m,
 	}
 
 	res.Render(req.Values, "error.html", "layouts/default.html")
-}
-
-var notFoundHandler = func(req *air.Request, res *air.Response) error {
-	res.Status = 404
-	return errors.New("Not Found")
-}
-
-var methodNotAllowedHandler = func(req *air.Request, res *air.Response) error {
-	res.Status = 405
-	return errors.New("Method Not Allowed")
 }
