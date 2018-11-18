@@ -38,6 +38,8 @@ type post struct {
 }
 
 var (
+	a = air.Default
+
 	postsOnce    sync.Once
 	posts        map[string]post
 	orderedPosts []post
@@ -47,8 +49,6 @@ var (
 	feedETag         string
 	feedLastModified string
 )
-
-var a = air.Default
 
 func init() {
 	cf := flag.String("config", "config.toml", "configuration file")
@@ -217,10 +217,12 @@ func homeHandler(req *air.Request, res *air.Response) error {
 
 func postsHandler(req *air.Request, res *air.Response) error {
 	postsOnce.Do(parsePosts)
+
 	req.Values["PageTitle"] = req.LocalizedString("Posts")
 	req.Values["CanonicalPath"] = "/posts"
 	req.Values["IsPosts"] = true
 	req.Values["Posts"] = orderedPosts
+
 	return res.Render(req.Values, "posts.html", "layouts/default.html")
 }
 
@@ -259,30 +261,32 @@ func feedHandler(req *air.Request, res *air.Response) error {
 }
 
 func errorHandler(err error, req *air.Request, res *air.Response) {
-	if res.Written {
-		return
+	if !res.Written {
+		if res.Status < http.StatusBadRequest {
+			res.Status = http.StatusInternalServerError
+		}
+
+		if req.Method == http.MethodGet ||
+			req.Method == http.MethodHead {
+			res.Header.Del("Cache-Control")
+			res.Header.Del("ETag")
+			res.Header.Del("Last-Modified")
+		}
 	}
 
-	if res.Status < http.StatusBadRequest {
-		res.Status = http.StatusInternalServerError
-	}
+	if res.ContentLength == 0 {
+		m := err.Error()
+		if !req.Air.DebugMode &&
+			res.Status == http.StatusInternalServerError {
+			m = http.StatusText(res.Status)
+		}
 
-	m := err.Error()
-	if !req.Air.DebugMode && res.Status == http.StatusInternalServerError {
-		m = http.StatusText(res.Status)
-	}
+		req.Values["PageTitle"] = res.Status
+		req.Values["Error"] = map[string]interface{}{
+			"Code":    res.Status,
+			"Message": m,
+		}
 
-	if req.Method == http.MethodGet || req.Method == http.MethodHead {
-		res.Header.Del("Cache-Control")
-		res.Header.Del("ETag")
-		res.Header.Del("Last-Modified")
+		res.Render(req.Values, "error.html", "layouts/default.html")
 	}
-
-	req.Values["PageTitle"] = res.Status
-	req.Values["Error"] = map[string]interface{}{
-		"Code":    res.Status,
-		"Message": m,
-	}
-
-	res.Render(req.Values, "error.html", "layouts/default.html")
 }
