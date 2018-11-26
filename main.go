@@ -26,8 +26,8 @@ import (
 	"github.com/aofei/air"
 	"github.com/fsnotify/fsnotify"
 	"github.com/russross/blackfriday/v2"
-	"github.com/tdewolff/minify"
-	mxml "github.com/tdewolff/minify/xml"
+	"github.com/tdewolff/minify/v2"
+	mxml "github.com/tdewolff/minify/v2/xml"
 )
 
 type post struct {
@@ -92,7 +92,8 @@ func init() {
 	}
 
 	feedTemplate = template.Must(
-		template.New("feed").
+		template.
+			New("feed").
 			Funcs(map[string]interface{}{
 				"xmlescape": func(s string) string {
 					buf := bytes.Buffer{}
@@ -257,7 +258,7 @@ func feedHandler(req *air.Request, res *air.Response) error {
 	res.Header.Set("ETag", feedETag)
 	res.Header.Set("Last-Modified", feedLastModified)
 
-	return res.WriteBlob(feed)
+	return res.Write(bytes.NewReader(feed))
 }
 
 func errorHandler(err error, req *air.Request, res *air.Response) {
@@ -268,9 +269,9 @@ func errorHandler(err error, req *air.Request, res *air.Response) {
 
 		if req.Method == http.MethodGet ||
 			req.Method == http.MethodHead {
-			res.Header.Del("Cache-Control")
 			res.Header.Del("ETag")
 			res.Header.Del("Last-Modified")
+			res.Header.Del("Cache-Control")
 		}
 	}
 
