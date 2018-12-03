@@ -121,6 +121,8 @@ func main() {
 	}
 
 	a.FILE("/robots.txt", "robots.txt")
+	a.FILE("/favicon.ico", "favicon.ico")
+	a.FILE("/apple-touch-icon.png", "apple-touch-icon.png")
 	a.STATIC(
 		"/assets",
 		a.AssetRoot,
