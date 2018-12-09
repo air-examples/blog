@@ -2,7 +2,8 @@ package main
 
 import (
 	"bytes"
-	"crypto/md5"
+	"encoding/base64"
+	"encoding/binary"
 	"encoding/xml"
 	"flag"
 	"fmt"
@@ -24,6 +25,7 @@ import (
 	"github.com/air-gases/logger"
 	"github.com/air-gases/redirector"
 	"github.com/aofei/air"
+	"github.com/cespare/xxhash"
 	"github.com/fsnotify/fsnotify"
 	"github.com/russross/blackfriday/v2"
 	"github.com/tdewolff/minify/v2"
@@ -208,7 +210,11 @@ func parsePosts() {
 
 	if b := buf2.Bytes(); !bytes.Equal(b, feed) {
 		feed = b
-		feedETag = fmt.Sprintf(`"%x"`, md5.Sum(feed))
+
+		d := make([]byte, 8)
+		binary.BigEndian.PutUint64(d, xxhash.Sum64(feed))
+		feedETag = "\"" + base64.StdEncoding.EncodeToString(d) + "\""
+
 		feedLastModified = time.Now().UTC().Format(http.TimeFormat)
 	}
 }
