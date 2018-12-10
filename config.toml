@@ -1,7 +1,7 @@
 # Basis
 app_name = "blog"
 debug_mode = true
-address = "localhost:2333"
+address = "localhost:8080"
 minifier_enabled = true
 coffer_enabled = true
 i18n_enabled = true
