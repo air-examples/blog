@@ -220,19 +220,19 @@ func parsePosts() {
 }
 
 func homeHandler(req *air.Request, res *air.Response) error {
-	req.Values["CanonicalPath"] = ""
-	return res.Render(req.Values, "index.html")
+	return res.Render(map[string]interface{}{
+		"CanonicalPath": "",
+	}, "index.html")
 }
 
 func postsHandler(req *air.Request, res *air.Response) error {
 	postsOnce.Do(parsePosts)
-
-	req.Values["PageTitle"] = req.LocalizedString("Posts")
-	req.Values["CanonicalPath"] = "/posts"
-	req.Values["IsPosts"] = true
-	req.Values["Posts"] = orderedPosts
-
-	return res.Render(req.Values, "posts.html", "layouts/default.html")
+	return res.Render(map[string]interface{}{
+		"PageTitle":     req.LocalizedString("Posts"),
+		"CanonicalPath": "/posts",
+		"IsPosts":       true,
+		"Posts":         orderedPosts,
+	}, "posts.html", "layouts/default.html")
 }
 
 func postHandler(req *air.Request, res *air.Response) error {
@@ -243,19 +243,20 @@ func postHandler(req *air.Request, res *air.Response) error {
 		return a.NotFoundHandler(req, res)
 	}
 
-	req.Values["PageTitle"] = p.Title
-	req.Values["CanonicalPath"] = "/posts/" + p.ID
-	req.Values["IsPosts"] = true
-	req.Values["Post"] = p
-
-	return res.Render(req.Values, "post.html", "layouts/default.html")
+	return res.Render(map[string]interface{}{
+		"PageTitle":     p.Title,
+		"CanonicalPath": "/posts/" + p.ID,
+		"IsPosts":       true,
+		"Post":          p,
+	}, "post.html", "layouts/default.html")
 }
 
 func bioHandler(req *air.Request, res *air.Response) error {
-	req.Values["PageTitle"] = req.LocalizedString("Bio")
-	req.Values["CanonicalPath"] = "/bio"
-	req.Values["IsBio"] = true
-	return res.Render(req.Values, "bio.html", "layouts/default.html")
+	return res.Render(map[string]interface{}{
+		"PageTitle":     req.LocalizedString("Bio"),
+		"CanonicalPath": "/bio",
+		"IsBio":         true,
+	}, "bio.html", "layouts/default.html")
 }
 
 func feedHandler(req *air.Request, res *air.Response) error {
@@ -290,12 +291,12 @@ func errorHandler(err error, req *air.Request, res *air.Response) {
 			m = http.StatusText(res.Status)
 		}
 
-		req.Values["PageTitle"] = res.Status
-		req.Values["Error"] = map[string]interface{}{
-			"Code":    res.Status,
-			"Message": m,
-		}
-
-		res.Render(req.Values, "error.html", "layouts/default.html")
+		res.Render(map[string]interface{}{
+			"PageTitle": res.Status,
+			"Error": map[string]interface{}{
+				"Code":    res.Status,
+				"Message": m,
+			},
+		}, "error.html", "layouts/default.html")
 	}
 }
