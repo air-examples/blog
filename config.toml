@@ -1,4 +1,4 @@
-# Basis
+# Air
 app_name = "blog"
 debug_mode = true
 address = "localhost:8080"
