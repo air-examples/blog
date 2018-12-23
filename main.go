@@ -276,12 +276,7 @@ func errorHandler(err error, req *air.Request, res *air.Response) {
 			res.Status = http.StatusInternalServerError
 		}
 
-		if req.Method == http.MethodGet ||
-			req.Method == http.MethodHead {
-			res.Header.Del("ETag")
-			res.Header.Del("Last-Modified")
-			res.Header.Del("Cache-Control")
-		}
+		res.Header.Del("Cache-Control")
 	}
 
 	if res.ContentLength == 0 {
