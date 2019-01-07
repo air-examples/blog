@@ -125,16 +125,12 @@ func main() {
 	a.FILE("/robots.txt", "robots.txt")
 	a.FILE("/favicon.ico", "favicon.ico")
 	a.FILE("/apple-touch-icon.png", "apple-touch-icon.png")
-	a.STATIC(
-		"/assets",
-		a.AssetRoot,
-		func(next air.Handler) air.Handler {
-			return func(req *air.Request, res *air.Response) error {
-				res.Header.Set("Cache-Control", "max-age=3600")
-				return next(req, res)
-			}
-		},
-	)
+	a.FILES("/assets", a.AssetRoot, func(next air.Handler) air.Handler {
+		return func(req *air.Request, res *air.Response) error {
+			res.Header.Set("Cache-Control", "max-age=3600")
+			return next(req, res)
+		}
+	})
 	a.GET("/", homeHandler)
 	a.HEAD("/", homeHandler)
 	a.GET("/posts", postsHandler)
@@ -238,7 +234,12 @@ func postsHandler(req *air.Request, res *air.Response) error {
 func postHandler(req *air.Request, res *air.Response) error {
 	postsOnce.Do(parsePosts)
 
-	p, ok := posts[req.Param("ID").Value().String()]
+	pID := req.Param("ID")
+	if pID == nil {
+		return a.NotFoundHandler(req, res)
+	}
+
+	p, ok := posts[pID.Value().String()]
 	if !ok {
 		return a.NotFoundHandler(req, res)
 	}
