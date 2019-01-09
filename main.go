@@ -131,8 +131,8 @@ func main() {
 			return next(req, res)
 		}
 	})
-	a.GET("/", homeHandler)
-	a.HEAD("/", homeHandler)
+	a.GET("/", indexHandler)
+	a.HEAD("/", indexHandler)
 	a.GET("/posts", postsHandler)
 	a.HEAD("/posts", postsHandler)
 	a.GET("/posts/:ID", postHandler)
@@ -215,10 +215,8 @@ func parsePosts() {
 	}
 }
 
-func homeHandler(req *air.Request, res *air.Response) error {
-	return res.Render(map[string]interface{}{
-		"CanonicalPath": "",
-	}, "index.html")
+func indexHandler(req *air.Request, res *air.Response) error {
+	return res.Render(nil, "index.html")
 }
 
 func postsHandler(req *air.Request, res *air.Response) error {
@@ -272,27 +270,26 @@ func feedHandler(req *air.Request, res *air.Response) error {
 }
 
 func errorHandler(err error, req *air.Request, res *air.Response) {
-	if !res.Written {
-		if res.Status < http.StatusBadRequest {
-			res.Status = http.StatusInternalServerError
-		}
-
+	if res.ContentLength > 0 {
+		return
+	} else if !res.Written {
 		res.Header.Del("Cache-Control")
 	}
 
-	if res.ContentLength == 0 {
-		m := err.Error()
-		if !req.Air.DebugMode &&
-			res.Status == http.StatusInternalServerError {
-			m = http.StatusText(res.Status)
-		}
-
-		res.Render(map[string]interface{}{
-			"PageTitle": res.Status,
-			"Error": map[string]interface{}{
-				"Code":    res.Status,
-				"Message": m,
-			},
-		}, "error.html", "layouts/default.html")
+	m := err.Error()
+	if !req.Air.DebugMode && res.Status == http.StatusInternalServerError {
+		m = http.StatusText(res.Status)
 	}
+
+	res.Render(map[string]interface{}{
+		"PageTitle": fmt.Sprintf(
+			"%s %d",
+			req.LocalizedString("Error"),
+			res.Status,
+		),
+		"Error": map[string]interface{}{
+			"Code":    res.Status,
+			"Message": m,
+		},
+	}, "error.html", "layouts/default.html")
 }
