@@ -2,6 +2,7 @@ module github.com/air-examples/blog
 
 require (
 	github.com/BurntSushi/toml v0.3.1
+	github.com/air-gases/cacheman v0.1.0
 	github.com/air-gases/defibrillator v0.6.0
 	github.com/air-gases/limiter v0.6.0
 	github.com/air-gases/logger v0.6.0

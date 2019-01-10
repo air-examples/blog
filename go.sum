@@ -4,6 +4,8 @@ github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/VictoriaMetrics/fastcache v1.3.2 h1:AcYQrJA1HiXy23hqOK1yvdWmKuGzOQbVAd5rzXltscA=
 github.com/VictoriaMetrics/fastcache v1.3.2/go.mod h1:CH4+tdFBMyTCU9HV/ifYqJvn7ECWfK1E7ES6eWt6F2o=
+github.com/air-gases/cacheman v0.1.0 h1:LmOteCZBnDVg1mN69JQTGo7PuvXRJVqnuuwX2xd7r3M=
+github.com/air-gases/cacheman v0.1.0/go.mod h1:3suXz8eADWvZDqM7EMGsxaQrqIeGuSEukWYegB7Kwfo=
 github.com/air-gases/defibrillator v0.6.0 h1:DkW3oV9SJpgb7oYctuLozMDQZXS34/Fwiyv1Z4nu7X8=
 github.com/air-gases/defibrillator v0.6.0/go.mod h1:Bwb8ojnBVpQFP1XJoItBTt1KtVxnv5iNBZzmhtzA5eQ=
 github.com/air-gases/limiter v0.6.0 h1:iEC3KkWltxyHDguRahVrNF/qZrVsWL0vNGypA5/FWSk=

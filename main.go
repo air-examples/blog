@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/air-gases/cacheman"
 	"github.com/air-gases/defibrillator"
 	"github.com/air-gases/limiter"
 	"github.com/air-gases/logger"
@@ -123,14 +124,20 @@ func main() {
 	}
 
 	a.FILE("/robots.txt", "robots.txt")
-	a.FILE("/favicon.ico", "favicon.ico")
-	a.FILE("/apple-touch-icon.png", "apple-touch-icon.png")
-	a.FILES("/assets", a.AssetRoot, func(next air.Handler) air.Handler {
-		return func(req *air.Request, res *air.Response) error {
-			res.Header.Set("Cache-Control", "max-age=3600")
-			return next(req, res)
-		}
-	})
+	a.FILE("/favicon.ico", "favicon.ico", cacheman.Gas(cacheman.GasConfig{
+		MaxAge:  31536000,
+		SMaxAge: -1,
+	}))
+	a.FILE("/apple-touch-icon.png", "apple-touch-icon.png", cacheman.Gas(
+		cacheman.GasConfig{
+			MaxAge:  31536000,
+			SMaxAge: -1,
+		},
+	))
+	a.FILES("/assets", a.AssetRoot, cacheman.Gas(cacheman.GasConfig{
+		MaxAge:  600,
+		SMaxAge: -1,
+	}))
 	a.GET("/", indexHandler)
 	a.HEAD("/", indexHandler)
 	a.GET("/posts", postsHandler)
@@ -139,8 +146,14 @@ func main() {
 	a.HEAD("/posts/:ID", postHandler)
 	a.GET("/bio", bioHandler)
 	a.HEAD("/bio", bioHandler)
-	a.GET("/feed", feedHandler)
-	a.HEAD("/feed", feedHandler)
+	a.GET("/feed", feedHandler, cacheman.Gas(cacheman.GasConfig{
+		MaxAge:  600,
+		SMaxAge: -1,
+	}))
+	a.HEAD("/feed", feedHandler, cacheman.Gas(cacheman.GasConfig{
+		MaxAge:  600,
+		SMaxAge: -1,
+	}))
 
 	shutdownChan := make(chan os.Signal, 1)
 	signal.Notify(shutdownChan, os.Interrupt, syscall.SIGTERM)
@@ -262,7 +275,6 @@ func feedHandler(req *air.Request, res *air.Response) error {
 	postsOnce.Do(parsePosts)
 
 	res.Header.Set("Content-Type", "application/atom+xml; charset=utf-8")
-	res.Header.Set("Cache-Control", "max-age=3600")
 	res.Header.Set("ETag", feedETag)
 	res.Header.Set("Last-Modified", feedLastModified)
 
@@ -272,8 +284,6 @@ func feedHandler(req *air.Request, res *air.Response) error {
 func errorHandler(err error, req *air.Request, res *air.Response) {
 	if res.ContentLength > 0 {
 		return
-	} else if !res.Written {
-		res.Header.Del("Cache-Control")
 	}
 
 	m := err.Error()
