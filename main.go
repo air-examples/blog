@@ -24,7 +24,6 @@ import (
 	"github.com/air-gases/defibrillator"
 	"github.com/air-gases/limiter"
 	"github.com/air-gases/logger"
-	"github.com/air-gases/redirector"
 	"github.com/aofei/air"
 	"github.com/cespare/xxhash"
 	"github.com/fsnotify/fsnotify"
@@ -43,9 +42,9 @@ type post struct {
 var (
 	a = air.Default
 
-	postsOnce    sync.Once
-	posts        map[string]post
-	orderedPosts []post
+	parsePostsOnce sync.Once
+	posts          map[string]post
+	orderedPosts   []post
 
 	feed             []byte
 	feedTemplate     *template.Template
@@ -77,7 +76,8 @@ func init() {
 						"event": e.Op.String(),
 					},
 				)
-				postsOnce = sync.Once{}
+
+				parsePostsOnce = sync.Once{}
 			case err := <-postsWatcher.Errors:
 				a.ERROR(
 					"post watcher error",
@@ -113,47 +113,129 @@ func init() {
 }
 
 func main() {
-	a.ErrorHandler = errorHandler
+	a.ErrorHandler = func(err error, req *air.Request, res *air.Response) {
+		if res.ContentLength > 0 {
+			return
+		}
+
+		m := err.Error()
+		if !req.Air.DebugMode &&
+			res.Status == http.StatusInternalServerError {
+			m = http.StatusText(res.Status)
+		}
+
+		res.Render(map[string]interface{}{
+			"PageTitle": fmt.Sprintf(
+				"%s %d",
+				req.LocalizedString("Error"),
+				res.Status,
+			),
+			"Error": map[string]interface{}{
+				"Code":    res.Status,
+				"Message": m,
+			},
+		}, "error.html", "layouts/default.html")
+	}
+
 	a.Pregases = []air.Gas{
 		logger.Gas(logger.GasConfig{}),
 		defibrillator.Gas(defibrillator.GasConfig{}),
-		redirector.WWW2NonWWWGas(redirector.WWW2NonWWWGasConfig{}),
 		limiter.BodySizeGas(limiter.BodySizeGasConfig{
 			MaxBytes: 1 << 20,
 		}),
 	}
 
-	a.FILE("/robots.txt", "robots.txt")
-	a.FILE("/favicon.ico", "favicon.ico", cacheman.Gas(cacheman.GasConfig{
+	yearlyCacheman := cacheman.Gas(cacheman.GasConfig{
 		MaxAge:  31536000,
 		SMaxAge: -1,
-	}))
-	a.FILE("/apple-touch-icon.png", "apple-touch-icon.png", cacheman.Gas(
-		cacheman.GasConfig{
-			MaxAge:  31536000,
-			SMaxAge: -1,
+	})
+
+	hourlyCacheman := cacheman.Gas(cacheman.GasConfig{
+		MaxAge:  3600,
+		SMaxAge: -1,
+	})
+
+	a.FILE("/robots.txt", "robots.txt")
+	a.FILE("/favicon.ico", "favicon.ico", yearlyCacheman)
+	a.FILE("/apple-touch-icon.png", "apple-touch-icon.png", yearlyCacheman)
+	a.FILES("/assets", a.AssetRoot, hourlyCacheman)
+
+	a.BATCH(
+		[]string{http.MethodGet, http.MethodHead},
+		"/",
+		func(req *air.Request, res *air.Response) error {
+			return res.Render(nil, "index.html")
 		},
-	))
-	a.FILES("/assets", a.AssetRoot, cacheman.Gas(cacheman.GasConfig{
-		MaxAge:  600,
-		SMaxAge: -1,
-	}))
-	a.GET("/", indexHandler)
-	a.HEAD("/", indexHandler)
-	a.GET("/posts", postsHandler)
-	a.HEAD("/posts", postsHandler)
-	a.GET("/posts/:ID", postHandler)
-	a.HEAD("/posts/:ID", postHandler)
-	a.GET("/bio", bioHandler)
-	a.HEAD("/bio", bioHandler)
-	a.GET("/feed", feedHandler, cacheman.Gas(cacheman.GasConfig{
-		MaxAge:  600,
-		SMaxAge: -1,
-	}))
-	a.HEAD("/feed", feedHandler, cacheman.Gas(cacheman.GasConfig{
-		MaxAge:  600,
-		SMaxAge: -1,
-	}))
+	)
+
+	a.BATCH(
+		[]string{http.MethodGet, http.MethodHead},
+		"/posts",
+		func(req *air.Request, res *air.Response) error {
+			parsePostsOnce.Do(parsePosts)
+			return res.Render(map[string]interface{}{
+				"PageTitle":     req.LocalizedString("Posts"),
+				"CanonicalPath": "/posts",
+				"IsPostsPage":   true,
+				"Posts":         orderedPosts,
+			}, "posts.html", "layouts/default.html")
+		},
+	)
+
+	a.BATCH(
+		[]string{http.MethodGet, http.MethodHead},
+		"/posts/:ID",
+		func(req *air.Request, res *air.Response) error {
+			parsePostsOnce.Do(parsePosts)
+
+			pID := req.Param("ID")
+			if pID == nil {
+				return a.NotFoundHandler(req, res)
+			}
+
+			p, ok := posts[pID.Value().String()]
+			if !ok {
+				return a.NotFoundHandler(req, res)
+			}
+
+			return res.Render(map[string]interface{}{
+				"PageTitle":     p.Title,
+				"CanonicalPath": "/posts/" + p.ID,
+				"IsPostPage":    true,
+				"Post":          p,
+			}, "post.html", "layouts/default.html")
+		},
+	)
+
+	a.BATCH(
+		[]string{http.MethodGet, http.MethodHead},
+		"/bio",
+		func(req *air.Request, res *air.Response) error {
+			return res.Render(map[string]interface{}{
+				"PageTitle":     req.LocalizedString("Bio"),
+				"CanonicalPath": "/bio",
+				"IsBioPage":     true,
+			}, "bio.html", "layouts/default.html")
+		},
+	)
+
+	a.BATCH(
+		[]string{http.MethodGet, http.MethodHead},
+		"/feed",
+		func(req *air.Request, res *air.Response) error {
+			parsePostsOnce.Do(parsePosts)
+
+			res.Header.Set(
+				"Content-Type",
+				"application/atom+xml; charset=utf-8",
+			)
+			res.Header.Set("ETag", feedETag)
+			res.Header.Set("Last-Modified", feedLastModified)
+
+			return res.Write(bytes.NewReader(feed))
+		},
+		hourlyCacheman,
+	)
 
 	shutdownChan := make(chan os.Signal, 1)
 	signal.Notify(shutdownChan, os.Interrupt, syscall.SIGTERM)
@@ -226,80 +308,4 @@ func parsePosts() {
 
 		feedLastModified = time.Now().UTC().Format(http.TimeFormat)
 	}
-}
-
-func indexHandler(req *air.Request, res *air.Response) error {
-	return res.Render(nil, "index.html")
-}
-
-func postsHandler(req *air.Request, res *air.Response) error {
-	postsOnce.Do(parsePosts)
-	return res.Render(map[string]interface{}{
-		"PageTitle":     req.LocalizedString("Posts"),
-		"CanonicalPath": "/posts",
-		"IsPosts":       true,
-		"Posts":         orderedPosts,
-	}, "posts.html", "layouts/default.html")
-}
-
-func postHandler(req *air.Request, res *air.Response) error {
-	postsOnce.Do(parsePosts)
-
-	pID := req.Param("ID")
-	if pID == nil {
-		return a.NotFoundHandler(req, res)
-	}
-
-	p, ok := posts[pID.Value().String()]
-	if !ok {
-		return a.NotFoundHandler(req, res)
-	}
-
-	return res.Render(map[string]interface{}{
-		"PageTitle":     p.Title,
-		"CanonicalPath": "/posts/" + p.ID,
-		"IsPosts":       true,
-		"Post":          p,
-	}, "post.html", "layouts/default.html")
-}
-
-func bioHandler(req *air.Request, res *air.Response) error {
-	return res.Render(map[string]interface{}{
-		"PageTitle":     req.LocalizedString("Bio"),
-		"CanonicalPath": "/bio",
-		"IsBio":         true,
-	}, "bio.html", "layouts/default.html")
-}
-
-func feedHandler(req *air.Request, res *air.Response) error {
-	postsOnce.Do(parsePosts)
-
-	res.Header.Set("Content-Type", "application/atom+xml; charset=utf-8")
-	res.Header.Set("ETag", feedETag)
-	res.Header.Set("Last-Modified", feedLastModified)
-
-	return res.Write(bytes.NewReader(feed))
-}
-
-func errorHandler(err error, req *air.Request, res *air.Response) {
-	if res.ContentLength > 0 {
-		return
-	}
-
-	m := err.Error()
-	if !req.Air.DebugMode && res.Status == http.StatusInternalServerError {
-		m = http.StatusText(res.Status)
-	}
-
-	res.Render(map[string]interface{}{
-		"PageTitle": fmt.Sprintf(
-			"%s %d",
-			req.LocalizedString("Error"),
-			res.Status,
-		),
-		"Error": map[string]interface{}{
-			"Code":    res.Status,
-			"Message": m,
-		},
-	}, "error.html", "layouts/default.html")
 }

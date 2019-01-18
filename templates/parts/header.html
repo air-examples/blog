@@ -9,8 +9,8 @@
 
 			<div class="trigger">
 				<a href="/">{{locstr "Index"}}</a>
-				<a {{if .IsPosts}}class="selected"{{end}} href="/posts">{{locstr "Posts"}}</a>
-				<a {{if .IsBio}}class="selected"{{end}} href="/bio">{{locstr "Bio"}}</a>
+				<a {{if (or .IsPostsPage .IsPostPage)}}class="selected"{{end}} href="/posts">{{locstr "Posts"}}</a>
+				<a {{if .IsBioPage}}class="selected"{{end}} href="/bio">{{locstr "Bio"}}</a>
 			</div>
 		</nav>
 	</div>
