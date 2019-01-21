@@ -5,10 +5,12 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/xml"
+	"errors"
 	"flag"
 	"fmt"
 	htemplate "html/template"
 	"io/ioutil"
+	stdLog "log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,6 +20,7 @@ import (
 	"syscall"
 	"text/template"
 	"time"
+	"unsafe"
 
 	"github.com/BurntSushi/toml"
 	"github.com/air-gases/cacheman"
@@ -27,6 +30,8 @@ import (
 	"github.com/aofei/air"
 	"github.com/cespare/xxhash"
 	"github.com/fsnotify/fsnotify"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/russross/blackfriday/v2"
 	"github.com/tdewolff/minify/v2"
 	mxml "github.com/tdewolff/minify/v2/xml"
@@ -58,6 +63,8 @@ func init() {
 
 	a.ConfigFile = *cf
 
+	zerolog.TimeFieldFormat = ""
+
 	postsWatcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		panic(fmt.Errorf("failed to build post watcher: %v", err))
@@ -68,23 +75,13 @@ func init() {
 	go func() {
 		for {
 			select {
-			case e := <-postsWatcher.Events:
-				a.DEBUG(
-					"post file event occurs",
-					map[string]interface{}{
-						"file":  e.Name,
-						"event": e.Op.String(),
-					},
-				)
-
+			case <-postsWatcher.Events:
 				parsePostsOnce = sync.Once{}
 			case err := <-postsWatcher.Errors:
-				a.ERROR(
-					"post watcher error",
-					map[string]interface{}{
-						"error": err.Error(),
-					},
-				)
+				log.Error().
+					Str("app_name", a.AppName).
+					Err(err).
+					Msg("post watcher error")
 			}
 		}
 	}()
@@ -136,6 +133,8 @@ func main() {
 			},
 		}, "error.html", "layouts/default.html")
 	}
+
+	a.ErrorLogger = stdLog.New(&errorLogWriter{}, "", 0)
 
 	a.Pregases = []air.Gas{
 		logger.Gas(logger.GasConfig{}),
@@ -242,9 +241,10 @@ func main() {
 
 	go func() {
 		if err := a.Serve(); err != nil {
-			a.ERROR("server error", map[string]interface{}{
-				"error": err.Error(),
-			})
+			log.Error().
+				Str("app_name", a.AppName).
+				Err(err).
+				Msg("server error")
 		}
 	}()
 
@@ -308,4 +308,15 @@ func parsePosts() {
 
 		feedLastModified = time.Now().UTC().Format(http.TimeFormat)
 	}
+}
+
+type errorLogWriter struct{}
+
+func (elw *errorLogWriter) Write(b []byte) (int, error) {
+	log.Error().
+		Str("app_name", a.AppName).
+		Err(errors.New(*(*string)(unsafe.Pointer(&b)))).
+		Msg("air error")
+
+	return len(b), nil
 }
