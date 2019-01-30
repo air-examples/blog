@@ -33,6 +33,8 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/russross/blackfriday/v2"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 	"github.com/tdewolff/minify/v2"
 	mxml "github.com/tdewolff/minify/v2/xml"
 )
@@ -58,18 +60,52 @@ var (
 )
 
 func init() {
-	cf := flag.String("config", "config.toml", "configuration file")
-	flag.Parse()
+	cf := pflag.StringP("config", "c", "config.toml", "configuration file")
+
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
+
+	if f, err := os.Open(*cf); err != nil {
+		panic(fmt.Errorf("failed to open configuration file: %v", err))
+	} else if err := viper.ReadConfig(f); err != nil {
+		panic(fmt.Errorf("failed to read configuration file: %v", err))
+	}
+
+	zerolog.TimeFieldFormat = ""
+	switch viper.GetString("logger_level") {
+	case "debug":
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	case "info":
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	case "warn":
+		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	case "error":
+		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+	case "fatal":
+		zerolog.SetGlobalLevel(zerolog.FatalLevel)
+	case "panic":
+		zerolog.SetGlobalLevel(zerolog.PanicLevel)
+	case "no":
+		zerolog.SetGlobalLevel(zerolog.NoLevel)
+	case "disabled":
+		zerolog.SetGlobalLevel(zerolog.Disabled)
+	}
+
+	if viper.GetBool("debug_mode") {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
 
 	a.ConfigFile = *cf
 
-	zerolog.TimeFieldFormat = ""
-
 	postsWatcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		panic(fmt.Errorf("failed to build post watcher: %v", err))
+		log.Fatal().Err(err).
+			Str("app_name", viper.GetString("app_name")).
+			Msg("failed to build post watcher")
 	} else if err := postsWatcher.Add("posts"); err != nil {
-		panic(fmt.Errorf("failed to watch post directory: %v", err))
+		log.Fatal().Err(err).
+			Str("app_name", viper.GetString("app_name")).
+			Msg("failed to watch post directory")
 	}
 
 	go func() {
@@ -78,9 +114,8 @@ func init() {
 			case <-postsWatcher.Events:
 				parsePostsOnce = sync.Once{}
 			case err := <-postsWatcher.Errors:
-				log.Error().
+				log.Error().Err(err).
 					Str("app_name", a.AppName).
-					Err(err).
 					Msg("post watcher error")
 			}
 		}
@@ -88,7 +123,9 @@ func init() {
 
 	b, err := ioutil.ReadFile(filepath.Join(a.TemplateRoot, "feed.xml"))
 	if err != nil {
-		panic(fmt.Errorf("failed to read feed template file: %v", err))
+		log.Fatal().Err(err).
+			Str("app_name", viper.GetString("app_name")).
+			Msg("failed to read feed template file")
 	}
 
 	feedTemplate = template.Must(
@@ -241,9 +278,8 @@ func main() {
 
 	go func() {
 		if err := a.Serve(); err != nil {
-			log.Error().
+			log.Error().Err(err).
 				Str("app_name", a.AppName).
-				Err(err).
 				Msg("server error")
 		}
 	}()
@@ -313,9 +349,8 @@ func parsePosts() {
 type errorLogWriter struct{}
 
 func (elw *errorLogWriter) Write(b []byte) (int, error) {
-	log.Error().
+	log.Error().Err(errors.New(*(*string)(unsafe.Pointer(&b)))).
 		Str("app_name", a.AppName).
-		Err(errors.New(*(*string)(unsafe.Pointer(&b)))).
 		Msg("air error")
 
 	return len(b), nil

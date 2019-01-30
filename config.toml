@@ -6,3 +6,6 @@ minifier_enabled = true
 gzip_enabled = true
 coffer_enabled = true
 i18n_enabled = true
+
+# Logger
+logger_level = "debug"

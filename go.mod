@@ -12,5 +12,7 @@ require (
 	github.com/rs/zerolog v1.11.0
 	github.com/russross/blackfriday/v2 v2.0.1
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
+	github.com/spf13/pflag v1.0.3
+	github.com/spf13/viper v1.3.1
 	github.com/tdewolff/minify/v2 v2.3.8
 )
