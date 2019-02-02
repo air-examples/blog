@@ -65,10 +65,14 @@ func init() {
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
 
-	if f, err := os.Open(*cf); err != nil {
-		panic(fmt.Errorf("failed to open configuration file: %v", err))
-	} else if err := viper.ReadConfig(f); err != nil {
+	viper.SetConfigFile(*cf)
+	if err := viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("failed to read configuration file: %v", err))
+	} else if err := viper.Unmarshal(a); err != nil {
+		panic(fmt.Errorf(
+			"failed to unmarshal air configuration items: %v",
+			err,
+		))
 	}
 
 	zerolog.TimeFieldFormat = ""
@@ -91,20 +95,18 @@ func init() {
 		zerolog.SetGlobalLevel(zerolog.Disabled)
 	}
 
-	if viper.GetBool("debug_mode") {
+	if a.DebugMode {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
-
-	a.ConfigFile = *cf
 
 	postsWatcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal().Err(err).
-			Str("app_name", viper.GetString("app_name")).
+			Str("app_name", a.AppName).
 			Msg("failed to build post watcher")
 	} else if err := postsWatcher.Add("posts"); err != nil {
 		log.Fatal().Err(err).
-			Str("app_name", viper.GetString("app_name")).
+			Str("app_name", a.AppName).
 			Msg("failed to watch post directory")
 	}
 
@@ -124,7 +126,7 @@ func init() {
 	b, err := ioutil.ReadFile(filepath.Join(a.TemplateRoot, "feed.xml"))
 	if err != nil {
 		log.Fatal().Err(err).
-			Str("app_name", viper.GetString("app_name")).
+			Str("app_name", a.AppName).
 			Msg("failed to read feed template file")
 	}
 
