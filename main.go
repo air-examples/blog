@@ -123,7 +123,10 @@ func init() {
 		}
 	}()
 
-	b, err := ioutil.ReadFile(filepath.Join(a.TemplateRoot, "feed.xml"))
+	b, err := ioutil.ReadFile(filepath.Join(
+		a.RendererTemplateRoot,
+		"feed.xml",
+	))
 	if err != nil {
 		log.Fatal().Err(err).
 			Str("app_name", a.AppName).
@@ -142,7 +145,9 @@ func init() {
 				"now": func() time.Time {
 					return time.Now().UTC()
 				},
-				"timefmt": a.TemplateFuncMap["timefmt"],
+				"timefmt": func(t time.Time, l string) string {
+					return t.Format(l)
+				},
 			}).
 			Parse(string(b)),
 	)
@@ -196,7 +201,7 @@ func main() {
 	a.FILE("/robots.txt", "robots.txt")
 	a.FILE("/favicon.ico", "favicon.ico", yearlyCacheman)
 	a.FILE("/apple-touch-icon.png", "apple-touch-icon.png", yearlyCacheman)
-	a.FILES("/assets", a.AssetRoot, hourlyCacheman)
+	a.FILES("/assets", a.CofferAssetRoot, hourlyCacheman)
 
 	a.BATCH(
 		[]string{http.MethodGet, http.MethodHead},
