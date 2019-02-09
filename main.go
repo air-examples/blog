@@ -16,11 +16,11 @@ import (
 	"os/signal"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"syscall"
 	"text/template"
 	"time"
-	"unsafe"
 
 	"github.com/BurntSushi/toml"
 	"github.com/air-gases/cacheman"
@@ -356,7 +356,7 @@ func parsePosts() {
 type errorLogWriter struct{}
 
 func (elw *errorLogWriter) Write(b []byte) (int, error) {
-	log.Error().Err(errors.New(*(*string)(unsafe.Pointer(&b)))).
+	log.Error().Err(errors.New(strings.TrimSuffix(string(b), "\n"))).
 		Str("app_name", a.AppName).
 		Msg("air error")
 
