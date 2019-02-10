@@ -2,11 +2,11 @@ module github.com/air-examples/blog
 
 require (
 	github.com/BurntSushi/toml v0.3.1
-	github.com/air-gases/cacheman v0.3.0
-	github.com/air-gases/defibrillator v0.8.0
-	github.com/air-gases/limiter v0.8.0
-	github.com/air-gases/logger v0.8.0
-	github.com/aofei/air v0.8.0
+	github.com/air-gases/cacheman v0.3.1
+	github.com/air-gases/defibrillator v0.8.1
+	github.com/air-gases/limiter v0.8.1
+	github.com/air-gases/logger v0.8.1
+	github.com/aofei/air v0.8.1
 	github.com/cespare/xxhash v1.1.0
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/rs/zerolog v1.11.0
@@ -16,5 +16,4 @@ require (
 	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.1
 	github.com/tdewolff/minify/v2 v2.3.8
-	golang.org/x/sys v0.0.0-20190209173611-3b5209105503 // indirect
 )
