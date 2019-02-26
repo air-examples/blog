@@ -188,20 +188,24 @@ func main() {
 		}),
 	}
 
-	yearlyCacheman := cacheman.Gas(cacheman.GasConfig{
-		MaxAge:  31536000,
-		SMaxAge: -1,
-	})
-
-	hourlyCacheman := cacheman.Gas(cacheman.GasConfig{
+	hourlyCachemanGas := cacheman.Gas(cacheman.GasConfig{
 		MaxAge:  3600,
 		SMaxAge: -1,
 	})
 
+	yearlyCachemanGas := cacheman.Gas(cacheman.GasConfig{
+		MaxAge:  31536000,
+		SMaxAge: -1,
+	})
+
 	a.FILE("/robots.txt", "robots.txt")
-	a.FILE("/favicon.ico", "favicon.ico", yearlyCacheman)
-	a.FILE("/apple-touch-icon.png", "apple-touch-icon.png", yearlyCacheman)
-	a.FILES("/assets", a.CofferAssetRoot, hourlyCacheman)
+	a.FILE("/favicon.ico", "favicon.ico", yearlyCachemanGas)
+	a.FILE(
+		"/apple-touch-icon.png",
+		"apple-touch-icon.png",
+		yearlyCachemanGas,
+	)
+	a.FILES("/assets", a.CofferAssetRoot, hourlyCachemanGas)
 
 	a.BATCH(
 		[]string{http.MethodGet, http.MethodHead},
@@ -277,7 +281,7 @@ func main() {
 
 			return res.Write(bytes.NewReader(feed))
 		},
-		hourlyCacheman,
+		hourlyCachemanGas,
 	)
 
 	shutdownChan := make(chan os.Signal, 1)
