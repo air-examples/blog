@@ -4,22 +4,11 @@ Jon Snow's blog.
 
 ## Installation
 
-Open your terminal and execute
+Check out the latest version of this example and enter it
 
 ```bash
-$ go get github.com/air-examples/blog
-```
-
-done.
-
-> The only requirement is the [Go](https://golang.org), at least v1.9.
-
-## Usage
-
-Enter the directory where this example is located
-
-```bash
-$ cd $GOPATH/src/github.com/air-examples/blog
+$ git clone https://github.com/air-examples/blog.git
+$ cd blog
 ```
 
 and run it
