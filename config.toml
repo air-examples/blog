@@ -1,4 +1,5 @@
 # Air
+[air]
 app_name = "blog"
 debug_mode = true
 address = "localhost:8080"
@@ -7,5 +8,6 @@ gzip_enabled = true
 coffer_enabled = true
 i18n_enabled = true
 
-# Logger
+# Zerolog
+[zerolog]
 logger_level = "debug"
