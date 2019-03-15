@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	stdLog "log"
@@ -45,7 +46,8 @@ func main() {
 	}()
 
 	<-shutdownChan
-	a.Shutdown(time.Minute)
+	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
+	a.Shutdown(ctx)
 }
 
 func errorHandler(err error, req *air.Request, res *air.Response) {
