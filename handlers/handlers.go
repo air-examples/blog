@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	_ "github.com/air-examples/blog/cfg"
 	"github.com/air-gases/cacheman"
 	"github.com/aofei/air"
 )

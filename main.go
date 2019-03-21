@@ -51,17 +51,15 @@ func main() {
 }
 
 func errorHandler(err error, req *air.Request, res *air.Response) {
-	if res.ContentLength > 0 {
+	if res.Written {
 		return
 	}
 
-	if !res.Written && res.Status < http.StatusBadRequest {
-		res.Status = http.StatusInternalServerError
-	}
-
-	m := err.Error()
+	m := ""
 	if !req.Air.DebugMode && res.Status == http.StatusInternalServerError {
 		m = http.StatusText(res.Status)
+	} else {
+		m = err.Error()
 	}
 
 	res.Render(map[string]interface{}{
