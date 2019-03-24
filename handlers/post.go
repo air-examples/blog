@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/binary"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"net/http"
+	"path"
 	"path/filepath"
 	"sort"
 	"sync"
@@ -71,19 +73,14 @@ func postsPageHandler(req *air.Request, res *air.Response) error {
 func postPageHandler(req *air.Request, res *air.Response) error {
 	parsePostsOnce.Do(parsePosts)
 
-	pID := req.Param("ID")
-	if pID == nil {
-		return a.NotFoundHandler(req, res)
-	}
-
-	p, ok := posts[pID.Value().String()]
+	p, ok := posts[req.Param("ID").Value().String()]
 	if !ok {
 		return a.NotFoundHandler(req, res)
 	}
 
 	return res.Render(map[string]interface{}{
 		"PageTitle":     p.Title,
-		"CanonicalPath": "/posts/" + p.ID,
+		"CanonicalPath": path.Join("/posts", p.ID),
 		"IsPostPage":    true,
 		"Post":          p,
 	}, "post.html", "layouts/default.html")
@@ -140,7 +137,10 @@ func parsePosts() {
 
 		d := make([]byte, 8)
 		binary.BigEndian.PutUint64(d, xxhash.Sum64(feed))
-		feedETag = "\"" + base64.StdEncoding.EncodeToString(d) + "\""
+		feedETag = fmt.Sprintf(
+			"%q",
+			base64.StdEncoding.EncodeToString(d),
+		)
 
 		feedLastModified = time.Now().UTC().Format(http.TimeFormat)
 	}
