@@ -2,11 +2,11 @@ module github.com/air-examples/blog
 
 require (
 	github.com/BurntSushi/toml v0.3.1
-	github.com/air-gases/cacheman v0.5.1
-	github.com/air-gases/defibrillator v0.10.1
-	github.com/air-gases/limiter v0.10.1
-	github.com/air-gases/logger v0.10.1
-	github.com/aofei/air v0.10.1
+	github.com/air-gases/cacheman v0.5.2
+	github.com/air-gases/defibrillator v0.10.2
+	github.com/air-gases/limiter v0.10.2
+	github.com/air-gases/logger v0.10.2
+	github.com/aofei/air v0.10.2
 	github.com/cespare/xxhash/v2 v2.0.0
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/mitchellh/mapstructure v1.1.2
