@@ -9,8 +9,8 @@
 		<lastBuildDate>{{timefmt now "2006-01-02T15:04:05Z07:00"}}</lastBuildDate>
 		{{range .Posts}}
 		<item>
-			<title>{{xmlescape .Title}}</title>
-			<description>{{xmlescape (print .Content)}}</description>
+			<title>{{xmlescape (.Title "en-US")}}</title>
+			<description>{{xmlescape (print (.Content "en-US"))}}</description>
 			<pubDate>{{timefmt .Datetime "2006-01-02T15:04:05Z07:00"}}</pubDate>
 			<link>https://jon.snow.castle.black{{print "/posts/" .ID}}</link>
 			<guid isPermaLink="true">https://jon.snow.castle.black{{print "/posts/" .ID}}</guid>

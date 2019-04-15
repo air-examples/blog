@@ -11,3 +11,7 @@ i18n_enabled = true
 # Zerolog
 [zerolog]
 logger_level = "debug"
+
+# Post
+[post]
+root = "posts"

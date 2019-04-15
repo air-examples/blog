@@ -16,6 +16,10 @@ var (
 	Zerolog struct {
 		LoggerLevel string `mapstructure:"logger_level"`
 	}
+
+	Post struct {
+		Root string `mapstructure:"root"`
+	}
 )
 
 func init() {
@@ -40,6 +44,13 @@ func init() {
 	if err := mapstructure.Decode(m["zerolog"], &Zerolog); err != nil {
 		panic(fmt.Errorf(
 			"failed to decode zerolog configuration items: %v",
+			err,
+		))
+	}
+
+	if err := mapstructure.Decode(m["post"], &Post); err != nil {
+		panic(fmt.Errorf(
+			"failed to decode post configuration items: %v",
 			err,
 		))
 	}
