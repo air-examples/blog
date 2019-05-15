@@ -307,19 +307,33 @@ main {
 	margin-bottom: 20px;
 }
 
-time {
+time,
+article .publication-time {
 	color: #828282;
 	font-size: 14px;
 }
 
-article h1 {
-	font-size: 28px;
-	line-height: 1;
+article .publication-time {
+	border-bottom: 1px solid #e8e8e8;
+	margin-bottom: 20px;
+	padding-bottom: 10px;
 }
 
-article time {
-	display: block;
-	margin-bottom: 20px;
+article h1:not(:first-child),
+article h2:not(:first-child),
+article h3:not(:first-child),
+article h4:not(:first-child) {
+	margin-top: 20px;
+}
+
+article h1:not(:first-child),
+article h2 {
+	border-bottom: 1px solid #e8e8e8;
+	padding-bottom: 10px;
+}
+
+article h1 {
+	font-size: 28px;
 }
 
 article h2 {
