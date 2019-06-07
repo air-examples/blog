@@ -2,13 +2,10 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	stdLog "log"
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -24,7 +21,6 @@ var a = air.Default
 
 func main() {
 	a.ErrorHandler = errorHandler
-	a.ErrorLogger = stdLog.New(&errorLogWriter{}, "", 0)
 
 	a.Pregases = []air.Gas{
 		logger.Gas(logger.GasConfig{}),
@@ -76,14 +72,4 @@ func errorHandler(err error, req *air.Request, res *air.Response) {
 			"Message": m,
 		},
 	}, "error.html", "layouts/default.html")
-}
-
-type errorLogWriter struct{}
-
-func (elw *errorLogWriter) Write(b []byte) (int, error) {
-	log.Error().Err(errors.New(strings.TrimSuffix(string(b), "\n"))).
-		Str("app_name", a.AppName).
-		Msg("air error")
-
-	return len(b), nil
 }

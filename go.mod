@@ -15,4 +15,5 @@ require (
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/tdewolff/minify/v2 v2.5.0
 	golang.org/x/text v0.3.2
+	qiniupkg.com/x v7.0.8+incompatible
 )

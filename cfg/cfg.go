@@ -1,13 +1,17 @@
 package cfg
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	stdLog "log"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 	"github.com/aofei/air"
 	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -40,6 +44,8 @@ func init() {
 			err,
 		))
 	}
+
+	a.ErrorLogger = stdLog.New(&errorLogWriter{}, "", 0)
 
 	if err := mapstructure.Decode(m["zerolog"], &Zerolog); err != nil {
 		panic(fmt.Errorf(
@@ -78,4 +84,14 @@ func init() {
 	if a.DebugMode {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
+}
+
+type errorLogWriter struct{}
+
+func (elw *errorLogWriter) Write(b []byte) (int, error) {
+	log.Error().Err(errors.New(strings.TrimSuffix(string(b), "\n"))).
+		Str("app_name", a.AppName).
+		Msg("air error")
+
+	return len(b), nil
 }
