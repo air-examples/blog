@@ -2,11 +2,11 @@ module github.com/air-examples/blog
 
 require (
 	github.com/BurntSushi/toml v0.3.1
-	github.com/air-gases/cacheman v0.6.2
-	github.com/air-gases/defibrillator v0.11.2
-	github.com/air-gases/limiter v0.11.2
-	github.com/air-gases/logger v0.11.2
-	github.com/aofei/air v0.11.2
+	github.com/air-gases/cacheman v0.7.0
+	github.com/air-gases/defibrillator v0.12.0
+	github.com/air-gases/limiter v0.12.0
+	github.com/air-gases/logger v0.12.0
+	github.com/aofei/air v0.12.0
 	github.com/cespare/xxhash/v2 v2.0.1-0.20190104013014-3767db7a7e18
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/mitchellh/mapstructure v1.1.2
@@ -15,5 +15,4 @@ require (
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/tdewolff/minify/v2 v2.5.0
 	golang.org/x/text v0.3.2
-	qiniupkg.com/x v7.0.8+incompatible
 )
