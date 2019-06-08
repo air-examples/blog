@@ -36,5 +36,7 @@ for (var i = 0; i < times.length; i++) {
 }
 
 for (var i = 0; i < pres.length; i++) {
-	hljs.highlightBlock(pres[i].getElementsByTagName("code")[0]);
+	code = pres[i].getElementsByTagName("code")[0]
+	code.setAttribute("class", code.getAttribute("class").replace("language-", ""));
+	hljs.highlightBlock(code);
 }
