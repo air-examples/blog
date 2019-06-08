@@ -356,6 +356,11 @@ article h4 {
 	font-size: 15px;
 }
 
+article ul,
+article ol {
+	margin-left: 40px;
+}
+
 .error {
 	padding: 120px 0;
 	text-align: center;
