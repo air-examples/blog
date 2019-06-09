@@ -1,5 +1,6 @@
 <article>
 	<h1>{{.Post.Title .Locale}}</h1>
 	<div class="publication-time">{{locstr "Published on"}} <time datetime='{{timefmt .Post.Datetime "2006-01-02T15:04:05Z07:00"}}' format="Y-MM-DD HH:mm:ss"></time></div>
+	<hr>
 	{{.Post.Content .Locale}}
 </article>
