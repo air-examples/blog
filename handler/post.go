@@ -1,4 +1,4 @@
-package handlers
+package handler
 
 import (
 	"bytes"
@@ -18,7 +18,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/air-examples/blog/cfg"
-	"github.com/air-examples/blog/models"
+	"github.com/air-examples/blog/model"
 	"github.com/aofei/air"
 	"github.com/cespare/xxhash/v2"
 	"github.com/fsnotify/fsnotify"
@@ -31,8 +31,8 @@ import (
 
 var (
 	parsePostsOnce sync.Once
-	posts          map[string]*models.Post
-	orderedPosts   []*models.Post
+	posts          map[string]*model.Post
+	orderedPosts   []*model.Post
 )
 
 func init() {
@@ -105,8 +105,8 @@ func parsePosts() {
 
 	localeBase := baseTag.String()
 
-	nps := map[string]*models.Post{}
-	nops := []*models.Post{}
+	nps := map[string]*model.Post{}
+	nops := []*model.Post{}
 	if err := filepath.Walk(
 		pr,
 		func(p string, fi os.FileInfo, err error) error {
@@ -155,7 +155,7 @@ func parsePosts() {
 
 			post := nps[id]
 			if post == nil {
-				post = &models.Post{
+				post = &model.Post{
 					ID:       id,
 					Titles:   map[string]string{},
 					Contents: map[string]template.HTML{},

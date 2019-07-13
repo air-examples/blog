@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	_ "github.com/air-examples/blog/handlers"
+	_ "github.com/air-examples/blog/handler"
 	"github.com/air-gases/defibrillator"
 	"github.com/air-gases/limiter"
 	"github.com/air-gases/logger"
