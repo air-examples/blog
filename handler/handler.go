@@ -17,20 +17,15 @@ var (
 		MaxAge:  3600,
 		SMaxAge: -1,
 	})
-
-	yearlyCachemanGas = cacheman.Gas(cacheman.GasConfig{
-		MaxAge:  31536000,
-		SMaxAge: -1,
-	})
 )
 
 func init() {
 	a.FILE("/robots.txt", "robots.txt")
-	a.FILE("/favicon.ico", "favicon.ico", yearlyCachemanGas)
+	a.FILE("/favicon.ico", "favicon.ico", hourlyCachemanGas)
 	a.FILE(
 		"/apple-touch-icon.png",
 		"apple-touch-icon.png",
-		yearlyCachemanGas,
+		hourlyCachemanGas,
 	)
 
 	a.FILES("/assets", a.CofferAssetRoot, hourlyCachemanGas)
