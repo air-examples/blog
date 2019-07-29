@@ -14,6 +14,7 @@ var (
 	getHeadMethods = []string{http.MethodGet, http.MethodHead}
 
 	hourlyCachemanGas = cacheman.Gas(cacheman.GasConfig{
+		Public:  true,
 		MaxAge:  3600,
 		SMaxAge: -1,
 	})
