@@ -3,10 +3,10 @@ package handler
 import "github.com/aofei/air"
 
 func init() {
-	a.BATCH(getHeadMethods, "/about", aboutPageHandler)
+	a.BATCH(getHeadMethods, "/about", aboutPage)
 }
 
-func aboutPageHandler(req *air.Request, res *air.Response) error {
+func aboutPage(req *air.Request, res *air.Response) error {
 	return res.Render(map[string]interface{}{
 		"PageTitle":     req.LocalizedString("About"),
 		"CanonicalPath": "/about",

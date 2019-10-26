@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	feed             []byte
 	feedTemplate     *template.Template
+	feedContent      []byte
 	feedETag         string
 	feedLastModified string
 )
@@ -49,15 +49,15 @@ func init() {
 			Parse(string(b)),
 	)
 
-	a.BATCH(getHeadMethods, "/feed", feedHandler, hourlyCachemanGas)
+	a.BATCH(getHeadMethods, "/feed", feed, hourlyCachemanGas)
 }
 
-func feedHandler(req *air.Request, res *air.Response) error {
+func feed(req *air.Request, res *air.Response) error {
 	parsePostsOnce.Do(parsePosts)
 
 	res.Header.Set("Content-Type", "application/atom+xml; charset=utf-8")
 	res.Header.Set("ETag", feedETag)
 	res.Header.Set("Last-Modified", feedLastModified)
 
-	return res.Write(bytes.NewReader(feed))
+	return res.Write(bytes.NewReader(feedContent))
 }

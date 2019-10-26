@@ -60,11 +60,11 @@ func init() {
 		}
 	}()
 
-	a.BATCH(getHeadMethods, "/posts", postsPageHandler)
-	a.BATCH(getHeadMethods, "/posts/:ID", postPageHandler)
+	a.BATCH(getHeadMethods, "/posts", postsPage)
+	a.BATCH(getHeadMethods, "/posts/:ID", postPage)
 }
 
-func postsPageHandler(req *air.Request, res *air.Response) error {
+func postsPage(req *air.Request, res *air.Response) error {
 	parsePostsOnce.Do(parsePosts)
 	return res.Render(map[string]interface{}{
 		"PageTitle":     req.LocalizedString("Posts"),
@@ -75,7 +75,7 @@ func postsPageHandler(req *air.Request, res *air.Response) error {
 	}, "posts.html", "layouts/default.html")
 }
 
-func postPageHandler(req *air.Request, res *air.Response) error {
+func postPage(req *air.Request, res *air.Response) error {
 	parsePostsOnce.Do(parsePosts)
 
 	p, ok := posts[req.Param("ID").Value().String()]
@@ -228,11 +228,11 @@ func parsePosts() {
 
 	buf2 := bytes.Buffer{}
 	xml.DefaultMinifier.Minify(minify.New(), &buf2, &buf, nil)
-	if b := buf2.Bytes(); !bytes.Equal(b, feed) {
-		feed = b
+	if b := buf2.Bytes(); !bytes.Equal(b, feedContent) {
+		feedContent = b
 
 		d := make([]byte, 8)
-		binary.BigEndian.PutUint64(d, xxhash.Sum64(feed))
+		binary.BigEndian.PutUint64(d, xxhash.Sum64(feedContent))
 		feedETag = fmt.Sprintf(
 			"%q",
 			base64.StdEncoding.EncodeToString(d),

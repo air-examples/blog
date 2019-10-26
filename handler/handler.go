@@ -31,9 +31,9 @@ func init() {
 
 	a.FILES("/assets", a.CofferAssetRoot, hourlyCachemanGas)
 
-	a.BATCH(getHeadMethods, "/", indexPageHandler)
+	a.BATCH(getHeadMethods, "/", indexPage)
 }
 
-func indexPageHandler(req *air.Request, res *air.Response) error {
+func indexPage(req *air.Request, res *air.Response) error {
 	return res.Render(nil, "index.html")
 }
