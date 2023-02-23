@@ -15,5 +15,5 @@ require (
 	github.com/rs/zerolog v1.20.0
 	github.com/russross/blackfriday/v2 v2.1.0
 	github.com/tdewolff/minify/v2 v2.9.10
-	golang.org/x/text v0.3.4
+	golang.org/x/text v0.3.8
 )
